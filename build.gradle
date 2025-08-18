@@ -1,0 +1,77 @@
+plugins {
+  id 'java'
+  id 'application' // 선택: mainClass 실행용
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17) // 11+ 권장, 17 추천
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  // 2025-08 기준 최신
+  playwrightVersion = '1.54.0'
+  junitVersion      = '5.13.3'
+  slf4jVersion      = '2.0.17' // 필요 시 간단 로깅
+
+  seleniumVersion = '4.23.0'
+  wdmVersion      = '5.9.2'   // WebDriverManager
+}
+
+dependencies {
+  implementation "com.microsoft.playwright:playwright:${playwrightVersion}"
+  implementation "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
+  implementation "io.github.bonigarcia:webdrivermanager:${wdmVersion}"
+
+  // (선택) 콘솔 로깅이 필요하면 활성화
+  runtimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
+
+  testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+  testRuntimeOnly    "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+}
+
+test {
+  useJUnitPlatform()
+  // Playwright 테스트 안정화 옵션 예시
+  systemProperty "PLAYWRIGHT_JAVA_LOG", "false"
+}
+
+application {
+  // 앱에서 main 실행 시 사용 (예: ExportAndUpload.java)
+  mainClass = "com.example.ExportAndUpload"
+  //mainClass = "com.automation.marqvision.login.VisualLoginSelenium"
+}
+
+/**
+ * 브라우저 바이너리 사전 설치용 태스크 (CI 등에서 유용)
+ *  - `gradle pwInstall` 실행
+ *  - macOS/리눅스에서 필요한 OS 의존 패키지는 --with-deps로 함께 설치
+ */
+tasks.register('pwInstall', JavaExec) {
+  group = "playwright"
+  description = "Install Playwright browsers"
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.microsoft.playwright.CLI'
+  args = ['install', '--with-deps']
+}
+
+/**
+ * 인증 등 상태를 유지하고 싶을 때 user-data-dir 생성 예시
+ *  - `gradle pwCodegen` 후 수동 액션 기록/저장 가능
+ */
+tasks.register('pwCodegen', JavaExec) {
+  group = "playwright"
+  description = "Run Playwright codegen with a persistent user data dir"
+  classpath = sourceSets.main.runtimeClasspath
+  mainClass = 'com.microsoft.playwright.CLI'
+  args = ['codegen', '--user-data-dir=./user-data', 'https://brand.marqvision.com/login']
+}
+
