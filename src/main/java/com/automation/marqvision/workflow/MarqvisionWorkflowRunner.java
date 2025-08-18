@@ -1,6 +1,7 @@
 package com.automation.marqvision.workflow;
 
 import com.automation.marqvision.util.EnvUtils;
+import com.automation.marqvision.util.IniConfig;
 import com.automation.marqvision.util.selenium.DriverFactory;
 import com.automation.marqvision.usecase.*;
 import org.openqa.selenium.WebDriver;
@@ -20,9 +21,11 @@ public class MarqvisionWorkflowRunner {
         int backedUp = DownloadBackupManager.backupToSubfolder(downloadDir);
         System.out.println("[OK] Backup moved files: " + backedUp);
 
-        int x = 60, y = 60, w = 800, h = 600;
-        boolean headless = false; // true : 화면 안보이게, false : 화면 보이게 실행
-        WebDriver driver = DriverFactory.createChrome(downloadDir, headless, x, y, w, h);
+        // 2) UI 설정값 로드 (config.ini → 기본값 자동 폴백)
+        IniConfig.UiSettings ui = IniConfig.load();
+        System.out.println("[UI] " + ui);
+
+        WebDriver driver = DriverFactory.createChrome(downloadDir, ui);
 
         try {
             // 1) 로그인
@@ -34,9 +37,9 @@ public class MarqvisionWorkflowRunner {
             System.out.println("[OK] Navigated to monitoring page");
 
             // 3) Export 다운로드 완료 대기
-//            var downloader = new ExportDownloader(driver, Duration.ofSeconds(30));
-//            var file = downloader.clickAndWaitForDownload(downloadDir, Duration.ofSeconds(120));
-//            System.out.println("[OK] Downloaded: " + file.toAbsolutePath());
+            var downloader = new ExportDownloader(driver, Duration.ofSeconds(30));
+            var file = downloader.clickAndWaitForDownload(downloadDir, Duration.ofSeconds(120));
+            System.out.println("[OK] Downloaded: " + file.toAbsolutePath());
 
             // 4) 크롬 브라우저 종료
             driver.quit();
