@@ -22,7 +22,7 @@ public class MonitoringNavigator {
 
         // Export Chip (role=button + 텍스트 Export)
         By exportChip = By.xpath("//div[@role='button' and .//span[normalize-space()='Export']]");
-        WebElement chip = wait.until(ExpectedConditions.visibilityOfElementLocated(exportChip));
+        WebElement chip = wait.until(ExpectedConditions.visibilityOfElementLocated(exportChip));    //Export 버튼이 나타날 때까지 대기
         highlight(driver, chip);
     }
 }
