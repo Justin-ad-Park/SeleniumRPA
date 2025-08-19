@@ -2,6 +2,7 @@ package com.automation.marqvision.workflow;
 
 import com.automation.marqvision.util.EnvUtils;
 import com.automation.marqvision.util.IniConfig;
+import com.automation.marqvision.util.SecureSecrets;
 import com.automation.marqvision.util.selenium.DriverFactory;
 import com.automation.marqvision.usecase.*;
 import org.openqa.selenium.WebDriver;
@@ -12,9 +13,10 @@ import java.time.Duration;
 
 public class MarqvisionWorkflowRunner {
     public static void main(String[] args) {
-        final String EMAIL = EnvUtils.requireEnv("MARQVISION_EMAIL");
-        final String PASSWORD = EnvUtils.requireEnv("MARQVISION_PASSWORD");
-
+        SecureSecrets.Cred cred = getCredential();
+        String EMAIL = cred.email();
+        String PASSWORD = cred.password();
+        
         Path downloadDir = Paths.get(System.getProperty("user.home"), "Downloads", "marqvision");
 
         // 0) 기존 파일 백업 (가장 첫 단계)
@@ -51,4 +53,15 @@ public class MarqvisionWorkflowRunner {
         }
     }
 
+    private static SecureSecrets.Cred getCredential() {
+        SecureSecrets.Cred cred = SecureSecrets.loadFromEnvOrProp();
+        if (cred == null) cred = SecureSecrets.loadFromOsStore();
+        if (cred == null) {
+            System.err.println("[ERR] No credentials found. Save them to OS keychain or provide env/-D.");
+            System.exit(1);
+        }
+        return cred;
+    }
+
 }
+
