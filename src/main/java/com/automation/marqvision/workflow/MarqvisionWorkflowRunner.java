@@ -3,6 +3,7 @@ package com.automation.marqvision.workflow;
 import com.automation.marqvision.util.EnvUtils;
 import com.automation.marqvision.util.IniConfig;
 import com.automation.marqvision.util.SecureSecrets;
+import com.automation.marqvision.util.selenium.ChromeSession;
 import com.automation.marqvision.util.selenium.DriverFactory;
 import com.automation.marqvision.usecase.*;
 import org.openqa.selenium.WebDriver;
@@ -27,9 +28,8 @@ public class MarqvisionWorkflowRunner {
         IniConfig.UiSettings ui = IniConfig.load();
         System.out.println("[UI] " + ui);
 
-        WebDriver driver = DriverFactory.createChrome(downloadDir, ui);
-
-        try {
+        try (ChromeSession sess = DriverFactory.startChrome(downloadDir, ui)) {
+            WebDriver driver = sess.driver();
             // 1) 로그인
             new LoginAction(driver, Duration.ofSeconds(30)).login(EMAIL, PASSWORD);
             System.out.println("[OK] Login");
@@ -43,8 +43,6 @@ public class MarqvisionWorkflowRunner {
             var file = downloader.clickAndWaitForDownload(downloadDir, Duration.ofSeconds(120));
             System.out.println("[OK] Downloaded: " + file.toAbsolutePath());
 
-            // 4) 크롬 브라우저 종료
-            driver.quit();
 
             // TODO: 서버 업로드 로직 연결
 
