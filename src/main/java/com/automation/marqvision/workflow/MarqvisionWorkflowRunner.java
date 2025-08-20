@@ -42,13 +42,11 @@ public class MarqvisionWorkflowRunner {
             var downloader = new ExportDownloader(driver, Duration.ofSeconds(30));
             var file = downloader.clickAndWaitForDownload(downloadDir, Duration.ofSeconds(120));
             System.out.println("[OK] Downloaded: " + file.toAbsolutePath());
-
-
-            // TODO: 서버 업로드 로직 연결
-
-        } finally {
-
         }
+
+        // TODO: 서버 업로드 로직 연결
+
+
     }
 
     private static SecureSecrets.Cred getCredential() {
